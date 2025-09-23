@@ -1,0 +1,8 @@
+{:name "jamb"
+ :binscripts [{:main "bin/jamb"
+               :hardcode-syspath :dynamic
+               :is-janet true}]
+ :manpages ["man/man1/jamb.1"]
+ :sources [{:prefix "jamb"
+            :items ["lib" "init.janet"]}]}
+
