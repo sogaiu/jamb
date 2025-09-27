@@ -193,7 +193,7 @@
   # Fix the issue of :dependencies having a different meaning in the metadata
   (def deps (seq [d :in (get ret :dependencies @[])] d))
   (put ret :jpm-dependencies deps)
-  (put ret :dependencies @["spork"])
+  (put ret :dependencies @["jamb"])
   ret)
 
 (def- shimcode
