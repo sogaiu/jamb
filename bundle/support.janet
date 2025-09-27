@@ -1,6 +1,17 @@
 # adapted from jeep and spork
 (import ./mypath :as path)
 
+########################################################################
+
+(defn ddumpf
+  [msg & args]
+  (when (os/getenv "VERBOSE")
+    (if (not (empty? args))
+      (eprintf msg ;args)
+      (eprint msg))))
+
+########################################################################
+
 (defn get-os-stuff
   []
   (def seps {:windows `\` :mingw `\` :cygwin `\`})
@@ -11,6 +22,7 @@
 
 (defn add-manpages
   [manifest s]
+  (ddumpf "add-manpages: %n" manifest)
   (def manpages (get-in manifest [:info :manpages] []))
   (os/mkdir (string (dyn :syspath) s "man"))
   (os/mkdir (string (dyn :syspath) s "man" s "man1"))
@@ -19,6 +31,7 @@
 
 (defn add-sources
   [manifest s]
+  (ddumpf "add-sources: %n" manifest)
   (each src (get-in manifest [:info :sources])
     (def {:prefix prefix
           :items items} src)
@@ -28,6 +41,7 @@
 
 (defn add-binscripts
   [manifest [tos s]]
+  (ddumpf "add-binscripts: %n" manifest)
   (each binscript (get-in manifest [:info :binscripts] [])
     (def {:main main
           :hardcode-syspath hardcode-syspath
@@ -94,6 +108,7 @@
 (defn run-tests
   "Run tests on a project in the current directory."
   [&opt root-directory]
+  (ddumpf "run-tests: %n" root-directory)
   (var errors-found 0)
   (defn dodir
     [dir]
