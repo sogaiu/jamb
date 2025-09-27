@@ -7,6 +7,8 @@
   (def tos (os/which))
   [tos (get seps tos "/")])
 
+########################################################################
+
 (defn add-manpages
   [manifest s]
   (def manpages (get-in manifest [:info :manpages] []))
@@ -74,4 +76,46 @@
       (defer (os/rm bat-name)
         (spit bat-name bat-content)
         (bundle/add-bin manifest bat-name)))))
+
+########################################################################
+
+# adapted from declare-cc
+(def- colors
+  {:green "\e[32m"
+   :red "\e[31m"})
+
+(defn- color
+  "Color text with ascii escape sequences if (os/isatty)"
+  [input-color text]
+  (if (os/isatty)
+    (string (get colors input-color "\e[0m") text "\e[0m")
+    text))
+
+(defn run-tests
+  "Run tests on a project in the current directory."
+  [&opt root-directory]
+  (var errors-found 0)
+  (defn dodir
+    [dir]
+    (each sub (sort (os/dir dir))
+      (def ndir (string dir "/" sub))
+      (case (os/stat ndir :mode)
+        :file (when (string/has-suffix? ".janet" ndir)
+                (print "running " ndir " ...")
+                (flush)
+                (def result
+                  (os/execute [(dyn *executable* "janet") "--" ndir] :p))
+                (when (not= 0 result)
+                  (++ errors-found)
+                  (eprinf (color :red "non-zero exit code in %s: ") ndir)
+                  (eprintf "%d" result)))
+        :directory (dodir ndir))))
+  (dodir (or root-directory "test"))
+  (if (zero? errors-found)
+    (print (color :green "✓ All tests passed."))
+    (do
+      (prin (color :red "✘ Failing test scripts: "))
+      (printf "%d" errors-found)
+      (os/exit 1)))
+  (flush))
 
